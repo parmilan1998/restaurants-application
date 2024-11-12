@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Category } from './schemas/category.schema';
 import mongoose from 'mongoose';
@@ -12,6 +16,15 @@ export class CategoryService {
 
   // Create Category
   async create(category: Category): Promise<Category> {
+    // Check if category name already exists
+    const categoryExists = await this.categoryModel
+      .findOne({ name: category.name })
+      .exec();
+    if (categoryExists) {
+      throw new ConflictException(
+        `Category with the name "${category.name}" already exists.`,
+      );
+    }
     const res = await this.categoryModel.create(category);
     return res;
   }
@@ -34,6 +47,17 @@ export class CategoryService {
 
   // Update category
   async findUpdateById(id: string, category: Category): Promise<Category> {
+    // Check if the new category name already exists
+    if (category.name) {
+      const existingCategory = await this.categoryModel
+        .findOne({ name: category.name, _id: { $ne: id } })
+        .exec();
+      if (existingCategory) {
+        throw new ConflictException(
+          `Category with the name "${category.name}" already exists.`,
+        );
+      }
+    }
     return await this.categoryModel.findByIdAndUpdate(id, category, {
       new: true,
       runValidators: true,

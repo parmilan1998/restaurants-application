@@ -1,0 +1,5 @@
+1. Conflict Error (Same Name)
+ConflictException - 409
+
+2. Not found Error
+NotFoundException - 404
