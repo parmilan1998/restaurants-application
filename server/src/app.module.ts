@@ -9,6 +9,9 @@ import { CartModule } from './cart/cart.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 @Module({
   imports: [
@@ -20,6 +23,20 @@ import { UsersModule } from './users/users.module';
     WishlistModule,
     AuthModule,
     UsersModule,
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+    }),
+    MongooseModule.forRoot(process.env.MONGODB_URL, {
+      onConnectionCreate: (connection: Connection) => {
+        connection.on('connected', () => console.log('connected'));
+        connection.on('open', () => console.log('open'));
+        connection.on('disconnected', () => console.log('disconnected'));
+        connection.on('reconnected', () => console.log('reconnected'));
+        connection.on('disconnecting', () => console.log('disconnecting'));
+        return connection;
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
