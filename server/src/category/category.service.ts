@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -66,7 +67,14 @@ export class CategoryService {
 
   // Fetch single category
   async findById(id: string): Promise<Category> {
+    // ID validation
+    const isValid = mongoose.isValidObjectId(id);
+    if (!isValid) {
+      throw new BadRequestException('Please enter valid id..');
+    }
+
     const category = await this.categoryModel.findById(id);
+
     if (!category) {
       throw new NotFoundException('Category Not Found');
     }
@@ -75,6 +83,11 @@ export class CategoryService {
 
   // Update category
   async findUpdateById(id: string, category: Category): Promise<Category> {
+    // ID validation
+    const isValid = mongoose.isValidObjectId(id);
+    if (!isValid) {
+      throw new BadRequestException('Please enter valid id..');
+    }
     // Check if the new category name already exists
     if (category.name) {
       const existingCategory = await this.categoryModel
@@ -94,6 +107,11 @@ export class CategoryService {
 
   // Delete category
   async deleteCategory(id: string): Promise<Category> {
+    // ID validation
+    const isValid = mongoose.isValidObjectId(id);
+    if (!isValid) {
+      throw new BadRequestException('Please enter valid id..');
+    }
     const deleted = await this.categoryModel.findByIdAndDelete(id);
 
     if (!deleted) {
