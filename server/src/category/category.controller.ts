@@ -6,11 +6,13 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { Category } from './schemas/category.schema';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category-dto';
+import { Query as ExpressQuery } from 'express-serve-static-core';
 
 @Controller('categories')
 export class CategoryController {
@@ -22,8 +24,13 @@ export class CategoryController {
   }
 
   @Get()
-  async getAllCategories(): Promise<Category[]> {
-    return this.categoryService.findAll();
+  async getAllCategories(@Query() query: ExpressQuery): Promise<{
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+    categories: Category[];
+  }> {
+    return this.categoryService.findAll(query);
   }
 
   @Get(':id')

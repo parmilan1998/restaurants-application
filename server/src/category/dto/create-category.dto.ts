@@ -3,7 +3,7 @@ import { IsString, IsNotEmpty, MaxLength, IsBoolean } from 'class-validator';
 export class CreateCategoryDto {
   @IsString()
   @IsNotEmpty({ message: 'Category name is required.' })
-  @MaxLength(50, { message: 'Category name must not exceed 50 characters.' })
+  @MaxLength(5, { message: 'Category name must not exceed 5 characters.' })
   readonly name: string;
 
   @IsString()

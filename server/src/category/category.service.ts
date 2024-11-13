@@ -6,6 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Category } from './schemas/category.schema';
 import mongoose from 'mongoose';
+import { Query } from 'express-serve-static-core';
 
 @Injectable()
 export class CategoryService {
@@ -30,18 +31,45 @@ export class CategoryService {
   }
 
   // Fetch all the categories
-  async findAll(): Promise<Category[]> {
-    return await this.categoryModel.find().exec();
+  async findAll(query: Query): Promise<{
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+    categories: Category[];
+  }> {
+    // Pagination
+    const limit = 2;
+    const currentPage = Number(query.page) || 1;
+    const skip = limit * (currentPage - 1);
+
+    // Search
+    const keyword = query.keyword
+      ? {
+          name: {
+            $regex: query.keyword,
+            $options: 'i',
+          },
+        }
+      : {};
+
+    // Total Items
+    const totalItems = await this.categoryModel.countDocuments({ ...keyword });
+
+    const categories = await this.categoryModel
+      .find({ ...keyword })
+      .limit(limit)
+      .skip(skip)
+      .exec();
+
+    return { currentPage, itemsPerPage: limit, totalItems, categories };
   }
 
   // Fetch single category
   async findById(id: string): Promise<Category> {
     const category = await this.categoryModel.findById(id);
-
     if (!category) {
       throw new NotFoundException('Category Not Found');
     }
-
     return category;
   }
 
